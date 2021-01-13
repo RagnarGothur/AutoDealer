@@ -35,8 +35,8 @@ AutoDealer.autodeal_agreement = (function () {
 
     let showCreditTab = function (ctx) {
         let formContext = ctx.getFormContext();
-        let contact = formContext.getAttribute("autodeal_contact").getValue();
-        let automobile = formContext.getAttribute("autodeal_autoid").getValue();
+        let contact = formContext.getControl("autodeal_contact").getValue();
+        let automobile = formContext.getControl("autodeal_autoid").getValue();
 
         if (contact[0].id && automobile[0].id) {
             formContext.ui.tabs.get("credit_tab").setVisible(true);
@@ -45,8 +45,8 @@ AutoDealer.autodeal_agreement = (function () {
 
     let clearNumber = function (ctx) {
         let formContext = ctx.getFormContext();
-        let numberAttr = formContext.getAttribute("autodeal_name");
-        let numberStr = numberAttr.getValue();
+        let numberCtrl = formContext.getControl("autodeal_name");
+        let numberStr = numberCtrl.getValue();
         let cleared = "";
 
         for (let c of numberStr) {
@@ -55,7 +55,7 @@ AutoDealer.autodeal_agreement = (function () {
             }
         }
 
-        numberAttr.setValue(cleared);
+        numberCtrl.setValue(cleared);
     }
 
     let addEventHandlers = function (ctx) {
