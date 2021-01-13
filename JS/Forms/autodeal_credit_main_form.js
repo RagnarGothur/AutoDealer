@@ -1,8 +1,19 @@
 var AutoDealer = AutoDealer || {};
 
 AutoDealer.autodeal_credit = (function () {
+    /**
+     * Список валидаторов формы
+    */
     const FORM_VALIDATORS = [validateDateConsistency];
+
+    /**
+     * Количество миллисекунд в году. Пусть будет тут, не хочу тащить библиотеки ради простейшей операции
+    */
     const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365.25;
+
+    /**
+     * Количество миллисекунд в году. Пусть будет тут, не хочу тащить библиотеки ради простейшей операции
+    */
     const DATE_INCONSISTENT_MSG = "Дата окончания должна быть больше даты начала не менее, чем на год";
 
     /**
@@ -49,6 +60,9 @@ AutoDealer.autodeal_credit = (function () {
         }
     };
 
+    /**
+     * добавляет обработчики событий
+    */
     let addEventHandlers = function (ctx) {
         let formContext = ctx.getFormContext();
 

@@ -1,6 +1,9 @@
 var AutoDealer = AutoDealer || {};
 
 AutoDealer.autodeal_agreement = (function () {
+    /**
+     * Скрывает вкладки
+    */
     let hideTabs = function (ctx) {
         let formContext = ctx.getFormContext();
 
@@ -8,6 +11,9 @@ AutoDealer.autodeal_agreement = (function () {
         //formContext.ui.tabs.get("payment_tab").setVisible(false);
     };
 
+    /**
+     * Блокирует поля на таблице кредита
+    */
     let disableCreditTabFields = function (ctx) {
         let formContext = ctx.getFormContext();
 
@@ -23,6 +29,9 @@ AutoDealer.autodeal_agreement = (function () {
         });
     }
 
+    /**
+     * Разблокирует поля на таблице кредита
+    */
     let enableCreditTabFields = function (ctx) {
         let creditTab = ctx.getFormContext().ui.tabs.get("credit_tab");
 
@@ -33,6 +42,9 @@ AutoDealer.autodeal_agreement = (function () {
         });
     }
 
+    /**
+     * Делает видимой вкладку кредита
+    */
     let showCreditTab = function (ctx) {
         let formContext = ctx.getFormContext();
         let contact = formContext.getAttribute("autodeal_contact").getValue();
@@ -43,6 +55,9 @@ AutoDealer.autodeal_agreement = (function () {
         }
     }
 
+    /**
+     * Разблокирует поля на таблице кредита
+    */
     let clearNumber = function (ctx) {
         let formContext = ctx.getFormContext();
         let inputedNumber = formContext.getControl("autodeal_name").getValue();
@@ -57,6 +72,9 @@ AutoDealer.autodeal_agreement = (function () {
         formContext.getAttribute("autodeal_name").setValue(cleared);
     }
 
+    /**
+     * Добавляет обработчики событий
+    */
     let addEventHandlers = function (ctx) {
         let formContext = ctx.getFormContext();
 
