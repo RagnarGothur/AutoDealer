@@ -13,7 +13,7 @@ AutoDealer.autodeal_agreement = (function () {
 
         let creditTab = formContext.ui.tabs.get("credit_tab");
 
-        //hide credit tab fields except autodeal_creditid
+        //disable credit tab fields except autodeal_creditid
         creditTab.sections.forEach(section => {
             section.controls.forEach(control => {
                 if (control.getName() !== "autodeal_creditid") {
@@ -35,27 +35,26 @@ AutoDealer.autodeal_agreement = (function () {
 
     let showCreditTab = function (ctx) {
         let formContext = ctx.getFormContext();
-        let contact = formContext.getControl("autodeal_contact").getValue();
-        let automobile = formContext.getControl("autodeal_autoid").getValue();
+        let contact = formContext.getAttribute("autodeal_contact").getValue();
+        let automobile = formContext.getAttribute("autodeal_autoid").getValue();
 
-        if (contact[0].id && automobile[0].id) {
+        if (contact !== null && contact[0].id && automobile !== null && automobile[0].id) {
             formContext.ui.tabs.get("credit_tab").setVisible(true);
         }
     }
 
     let clearNumber = function (ctx) {
         let formContext = ctx.getFormContext();
-        let numberCtrl = formContext.getControl("autodeal_name");
-        let numberStr = numberCtrl.getValue();
+        let inputedNumber = formContext.getControl("autodeal_name").getValue();
         let cleared = "";
 
-        for (let c of numberStr) {
+        for (let c of inputedNumber) {
             if (c >= "0" && c <= "9" || c === "-") {
                 cleared += c;
             }
         }
 
-        numberCtrl.setValue(cleared);
+        formContext.getAttribute("autodeal_name").setValue(cleared);
     }
 
     let addEventHandlers = function (ctx) {

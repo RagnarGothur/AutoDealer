@@ -2,18 +2,18 @@ var AutoDealer = AutoDealer || {};
 
 AutoDealer.autodeal_vehicle = (function () {
     /**
-     * Устанавливает переданное значение в setVisible полей isDamaged, ownersCount, km
+     * Устанавливает переданное значение в setVisible полей isdamaged, ownerscount, km
     */
     let setUsedFieldsVisible = function (ctx, bool) {
         let formContext = ctx.getFormContext();
 
-        formContext.getControl("autodeal_isDamaged").setVisible(bool);
-        formContext.getControl("autodeal_ownersCount").setVisible(bool);
+        formContext.getControl("autodeal_isdamaged").setVisible(bool);
+        formContext.getControl("autodeal_ownerscount").setVisible(bool);
         formContext.getControl("autodeal_km").setVisible(bool);
     }
 
     /**
-     * обновляет информацию о видимости полей isDamaged, ownersCount, km
+     * обновляет информацию о видимости полей isdamaged, ownerscount, km
     */
     let updateUsedVisibleState = function (ctx) {
         let formContext = ctx.getFormContext();
