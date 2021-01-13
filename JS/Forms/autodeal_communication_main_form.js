@@ -8,7 +8,7 @@ AutoDealer.autodeal_communication = (function () {
         formContext.getControl("autodeal_phone").setVisible(false);
     }
 
-    let showAllowedFields = function (ctx) {
+    let showAllowedField = function (ctx) {
         let formContext = ctx.getFormContext();
         let communicationType = formContext.getAttribute("autodeal_type");
         
@@ -28,19 +28,19 @@ AutoDealer.autodeal_communication = (function () {
     let addEventHandlers = function (ctx) {
         let formContext = ctx.getFormContext();
 
-        formContext.getAttribute("autodeal_type").addOnChange(onAutodealChange);
+        formContext.getAttribute("autodeal_type").addOnChange(onTypeChanged);
     }
 
-    let onAutodealChange = function (ctx) {
+    let onTypeChanged = function (ctx) {
         //hide already showed field
         hideAllCommunicationFields(ctx);
-        showAllowedFields(ctx);
+        showAllowedField(ctx);
     }
 
     return {
         onLoad: function (ctx) {
             hideAllCommunicationFields(ctx);
-            showAllowedFields(ctx);
+            showAllowedField(ctx);
             addEventHandlers(ctx);
         }
     };
