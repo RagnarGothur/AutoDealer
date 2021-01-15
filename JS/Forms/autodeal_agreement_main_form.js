@@ -4,53 +4,55 @@ AutoDealer.autodeal_agreement = (function () {
     /**
      * Скрывает вкладки
     */
-    let hideTabs = function (ctx) {
+    function hideTabs(ctx) {
         let formContext = ctx.getFormContext();
 
         formContext.ui.tabs.get("credit_tab").setVisible(false);
-        //formContext.ui.tabs.get("payment_tab").setVisible(false);
     };
 
     /**
-     * Блокирует поля на таблице кредита
+     * изменяет состояние всех полей вкладки на переданное в disabled
+     * @param ctx = контекст,
+     * @param tabName = название таблицы,
+     * @param enabled = включить поля - bool,
+     * @param except = за исключением полей - [fieldName]. optional
     */
-    let disableCreditTabFields = function (ctx) {
+    function changeTabFieldsState(ctx, tabName, enabled, except = []) {
         let formContext = ctx.getFormContext();
 
-        let creditTab = formContext.ui.tabs.get("credit_tab");
+        let creditTab = formContext.ui.tabs.get(tabName);
 
-        //disable credit tab fields except autodeal_creditid
+        //disable tab fields except $except
         creditTab.sections.forEach(section => {
             section.controls.forEach(control => {
-                if (control.getName() !== "autodeal_creditid") {
-                    control.setDisabled(true);
+                let fieldName = control.getName();
+                if (!(except.includes(fieldName))) {
+                    control.setDisabled(!enabled);
                 }
             })
         });
     }
 
     /**
-     * Разблокирует поля на таблице кредита
+     * Обработчик события изменения кредитной программы.
+     * По ТЗ:
+     * Если кредитная программа не выбрана - отключить прочие поля на вкладке кредита.
     */
-    let enableCreditTabFields = function (ctx) {
-        let creditTab = ctx.getFormContext().ui.tabs.get("credit_tab");
+    function onCreditChange(ctx) {
+        let credit = ctx.getFormContext().getAttribute("autodeal_creditid").getValue();
 
-        creditTab.sections.forEach(section => {
-            section.controls.forEach(control => {
-                control.setDisabled(false);
-            })
-        });
+        changeTabFieldsState(ctx, "credit_tab", credit != null, ["autodeal_creditid"]);
     }
 
     /**
      * Делает видимой вкладку кредита
     */
-    let showCreditTab = function (ctx) {
+    function showCreditTab(ctx) {
         let formContext = ctx.getFormContext();
         let contact = formContext.getAttribute("autodeal_contact").getValue();
         let automobile = formContext.getAttribute("autodeal_autoid").getValue();
 
-        if (contact !== null && contact[0].id && automobile !== null && automobile[0].id) {
+        if (contact && contact[0].id && automobile && automobile[0].id) {
             formContext.ui.tabs.get("credit_tab").setVisible(true);
         }
     }
@@ -58,14 +60,44 @@ AutoDealer.autodeal_agreement = (function () {
     /**
      * Фильтрует кредитные программы по полю автомобиль оставляя сущности, связанные с автомобилем N to N
     */
-    let filterCreditPrograms = function (ctx) {
+    function filterCreditPrograms(ctx) {
         let formContext = ctx.getFormContext();
-        let automobile = formContext.getAttribute("autodeal_autoid").getValue();
+        let vehicle = formContext.getAttribute("autodeal_autoid").getValue();
         let credit = formContext.getControl("autodeal_creditid");
 
-        if (automobile) {
-            credit.addCustomFilter(
-                "<filter type='and'><condition attribute='autodeal_vehicleid' operator='eq' value='" + automobile[0].id + "'/></filter>"
+        if (vehicle) {
+            let fetchXml = [
+                "<fetch version='1.0' mapping='logical'>",
+                "  <entity name='autodeal_credit'>",
+                "    <link-entity name='autodeal_autodeal_credit_autodeal_vehicle' from='autodeal_creditid' to='autodeal_creditid' intersect='true'>",
+                "      <filter>",
+                "        <condition attribute='autodeal_vehicleid' operator='eq' value='", vehicle[0].id, "'/>",
+                "      </filter>",
+                "    </link-entity>",
+                "  </entity>",
+                "</fetch>",
+            ]
+                .join("");
+
+            let layout = [
+                "<grid name='resultset' object='10238' jump='autodeal_name' select='1' icon='1' preview='1' >",
+                "  <row name='result' id='autodeal_creditid' >",
+                "    <cell name='autodeal_name' width='300' />",
+                "    <cell name='autodeal_datestart' width='100' />",
+                "    <cell name='autodeal_dateend' width='100' />",
+                "    <cell name='autodeal_percent' width='100' />",
+                "  </row>",
+                "</grid>"
+            ]
+                .join("");
+
+            credit.addCustomView(
+                credit.getDefaultView(),
+                "autodeal_credit",
+                "Доступные кредитные программы по автомобилю " + vehicle[0].name,
+                fetchXml,
+                layout,
+                true
             );
         }
     }
@@ -73,7 +105,7 @@ AutoDealer.autodeal_agreement = (function () {
     /**
      * Разблокирует поля на таблице кредита
     */
-    let clearNumber = function (ctx) {
+    function clearNumber(ctx) {
         let formContext = ctx.getFormContext();
         let inputedNumber = formContext.getControl("autodeal_name").getValue();
 
@@ -93,22 +125,22 @@ AutoDealer.autodeal_agreement = (function () {
     /**
      * Добавляет обработчики событий
     */
-    let addEventHandlers = function (ctx) {
+    function addEventHandlers(ctx) {
         let formContext = ctx.getFormContext();
 
         formContext.getAttribute("autodeal_contact").addOnChange(showCreditTab);
         formContext.getAttribute("autodeal_autoid").addOnChange(showCreditTab);
-        formContext.getAttribute("autodeal_creditid").addOnChange(enableCreditTabFields);
+        formContext.getAttribute("autodeal_autoid").addOnChange(filterCreditPrograms);
+        formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChange);
         formContext.getAttribute("autodeal_name").addOnChange(clearNumber);
-
-        formContext.getControl("autodeal_creditid").addPreSearch(filterCreditPrograms);
     };
 
     return {
         onLoad: function (ctx) {
             hideTabs(ctx);
-            disableCreditTabFields(ctx);
+            changeTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
             addEventHandlers(ctx);
+            filterCreditPrograms(ctx);
         }
     };
 })();

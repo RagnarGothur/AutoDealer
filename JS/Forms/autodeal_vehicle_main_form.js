@@ -4,7 +4,7 @@ AutoDealer.autodeal_vehicle = (function () {
     /**
      * Устанавливает переданное значение в setVisible полей isdamaged, ownerscount, km
     */
-    let setUsedFieldsVisible = function (ctx, bool) {
+    function setUsedFieldsVisible (ctx, bool) {
         let formContext = ctx.getFormContext();
 
         formContext.getControl("autodeal_isdamaged").setVisible(bool);
@@ -15,7 +15,7 @@ AutoDealer.autodeal_vehicle = (function () {
     /**
      * обновляет информацию о видимости полей isdamaged, ownerscount, km
     */
-    let updateUsedVisibleState = function (ctx) {
+    function updateUsedVisibleState (ctx) {
         let formContext = ctx.getFormContext();
 
         setUsedFieldsVisible(ctx, formContext.getAttribute("autodeal_used").getValue());
@@ -24,7 +24,7 @@ AutoDealer.autodeal_vehicle = (function () {
     /**
      * добавляет обработчики событий
     */
-    let addEventHandlers = function (ctx) {
+    function addEventHandlers (ctx) {
         let formContext = ctx.getFormContext();
 
         formContext.getAttribute("autodeal_used").addOnChange(updateUsedVisibleState);

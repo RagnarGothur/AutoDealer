@@ -4,9 +4,9 @@ AutoDealer.autodeal_communication = (function () {
     /**
      * Скрывает поля email и phone
     */
-    let hideAllCommunicationFields = function (ctx) {
+    function hideAllCommunicationFields (ctx) {
         let formContext = ctx.getFormContext();
-        
+
         formContext.getControl("autodeal_email").setVisible(false);
         formContext.getControl("autodeal_phone").setVisible(false);
     }
@@ -14,10 +14,10 @@ AutoDealer.autodeal_communication = (function () {
     /**
      * Делает видимым поле в зависимости от выбранного типа коммуникации
     */
-    let showAllowedField = function (ctx) {
+    function showAllowedField (ctx) {
         let formContext = ctx.getFormContext();
         let communicationType = formContext.getAttribute("autodeal_type");
-        
+
         //if no option selected - do nothing at all
         if (communicationType.getSelectedOption()) {
             switch (communicationType.getSelectedOption().value % 10) {
@@ -34,7 +34,7 @@ AutoDealer.autodeal_communication = (function () {
     /**
      * Добавляет обработчики событий
     */
-    let addEventHandlers = function (ctx) {
+    function addEventHandlers (ctx) {
         let formContext = ctx.getFormContext();
 
         formContext.getAttribute("autodeal_type").addOnChange(onTypeChanged);
@@ -43,7 +43,7 @@ AutoDealer.autodeal_communication = (function () {
     /**
      * Обработчик события изменения поля type
     */
-    let onTypeChanged = function (ctx) {
+    function onTypeChanged (ctx) {
         //hide already showed field
         hideAllCommunicationFields(ctx);
         showAllowedField(ctx);

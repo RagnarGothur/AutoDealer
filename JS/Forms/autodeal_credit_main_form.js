@@ -12,7 +12,7 @@ AutoDealer.autodeal_credit = (function () {
     const MS_IN_YEAR = 1000 * 60 * 60 * 24 * 365; //високосными годами можно пренебречь
 
     /**
-     * Количество миллисекунд в году. Пусть будет тут, не хочу тащить библиотеки ради простейшей операции
+     * Сообщение об неконсистентности даты
     */
     const DATE_INCONSISTENT_MSG = "Дата окончания должна быть больше даты начала не менее, чем на год";
 
@@ -21,17 +21,16 @@ AutoDealer.autodeal_credit = (function () {
      * 1) дата окончания должна быть больше даты начала не менее, чем на год
      * returns: true - валидное состояние, false - невалидное
     */
-    let validateDateConsistency = function (ctx) {
+    function validateDateConsistency(ctx) {
         let formContext = ctx.getFormContext();
 
         let dateStartCtrl = formContext.getControl("autodeal_datestart");
         let dateEndCtrl = formContext.getControl("autodeal_dateend");
-        dateEndCtrl.clearNotification(); // remove deprecated ntf
+        dateEndCtrl.clearNotification(); // removing deprecated ntf
 
-        let dateStart = Date.parse(dateStartCtrl.getValue());
-        let dateEnd = Date.parse(dateEndCtrl.getValue());
+        let dateStart = dateStartCtrl.getAttribute().getValue();
+        let dateEnd = dateEndCtrl.getAttribute().getValue();
 
-        //naive solution. to be redo
         if (dateEnd - dateStart < MS_IN_YEAR) {
             dateEndCtrl.setNotification(DATE_INCONSISTENT_MSG);
             return false;
@@ -43,7 +42,7 @@ AutoDealer.autodeal_credit = (function () {
     /**
      * Валидирует данные на форме с помощью валидаторов из FORM_VALIDATORS
     */
-    let validateForm = function (ctx) {
+    function validateForm(ctx) {
         let event = context.getEventArgs();
         let valid = true;
 
@@ -63,11 +62,12 @@ AutoDealer.autodeal_credit = (function () {
     /**
      * добавляет обработчики событий
     */
-    let addEventHandlers = function (ctx) {
+    function addEventHandlers(ctx) {
         let formContext = ctx.getFormContext();
 
         formContext.data.entity.addOnSave(validateForm);
-        formContext.getAttribute("autodeal_dateend").addOnChange(validateDateConsistency());
+        formContext.getAttribute("autodeal_datestart").addOnChange(validateDateConsistency);
+        formContext.getAttribute("autodeal_dateend").addOnChange(validateDateConsistency);
     }
 
     return {
