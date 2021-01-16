@@ -93,7 +93,7 @@ AutoDealer.autodeal_agreement = (function () {
      * @param enabled = включить поля - bool,
      * @param except = за исключением полей - [fieldName]. optional
     */
-    function changeTabFieldsState(ctx, tabName, enabled, except = []) {
+    function updateTabFieldsState(ctx, tabName, enabled, except = []) {
         let formContext = ctx.getFormContext();
 
         let creditTab = formContext.ui.tabs.get(tabName);
@@ -116,12 +116,18 @@ AutoDealer.autodeal_agreement = (function () {
     */
     function onCreditChangeEventHandler(ctx) {
         let formContext = ctx.getFormContext();
-        let creditCtrl = formContext.getControl("autodeal_creditid");
         let credit = formContext.getAttribute("autodeal_creditid").getValue();
+
+        if (!credit) {
+            return;
+        }
+
+        let creditCtrl = formContext.getControl("autodeal_creditid");
 
         creditCtrl.clearNotification();
         formContext.getControl("autodeal_date").clearNotification();
 
+        //Валидация
         validateCredit(ctx)
             .then(
                 function (accumulator) {
@@ -136,11 +142,42 @@ AutoDealer.autodeal_agreement = (function () {
                 }
             );
 
-        changeTabFieldsState(ctx, "credit_tab", credit != null, ["autodeal_creditid"]);
+        //Разблокирование кредитных вкладок
+        updateTabFieldsState(ctx, "credit_tab", credit != null, ["autodeal_creditid"]);
+
+        //Обновление сроков кредита
+        updateCreditPeriod(ctx);
     }
 
     /**
-     * Обработчик события изменения даты договора. Проверяет валидность даты под
+     * Обновляет кредитный период согласно данным по выбранной кредитной программы
+    */
+    function updateCreditPeriod(ctx) {
+        let formContext = ctx.getFormContext();
+        let creditLookup = formContext.getAttribute("autodeal_creditid").getValue();
+
+        if (!creditLookup) {
+            return;
+        }
+
+        Xrm.WebApi
+            .retrieveRecord("autodeal_credit", creditLookup[0].id)
+            .then(
+                function (credit) {
+                    let creditPeriod = credit.autodeal_creditperiod;
+                    if (creditPeriod) {
+                        formContext.getAttribute("autodeal_creditperiod").setValue(creditPeriod);
+                    }
+                },
+
+                function (err) {
+                    console.error(err.message);
+                },
+            );
+    }
+
+    /**
+     * Обработчик события изменения даты договора
     */
     function onDateChangeEventHandler(ctx) {
         let formContext = ctx.getFormContext();
@@ -149,6 +186,7 @@ AutoDealer.autodeal_agreement = (function () {
         dateCtrl.clearNotification();
         formContext.getControl("autodeal_creditid").clearNotification();
 
+        //Валидация
         validateCredit(ctx)
             .then(
                 function (accumulator) {
@@ -285,8 +323,18 @@ AutoDealer.autodeal_agreement = (function () {
 
     return {
         onLoad: function (ctx) {
-            hideTab(ctx, "credit_tab");
-            changeTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
+            let formContext = ctx.getFormContext();
+
+            switch (formContext.ui.getFormType()) {
+                case 0: //Undefined
+                    console.error("cannot define form type");
+                //walkthrough 
+                case 1: //Create
+                    hideTab(ctx, "credit_tab");
+                    break;
+            }
+
+            updateTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
             addEventHandlers(ctx);
             filterCreditPrograms(ctx);
         }
