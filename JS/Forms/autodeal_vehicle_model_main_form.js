@@ -2,25 +2,6 @@ var AutoDealer = AutoDealer || {};
 
 AutoDealer.autodeal_vehicle_model = (function () {
     /**
-     * id роли системного администратора
-    */
-    const SYSTEM_ADMIN_ROLEID = "4c7cd3c4-9c42-eb11-bb23-000d3a49e35a";
-
-    /**
-     * Проверяет роли текущего пользователя
-    */
-    function checkAdminRole(ctx) {
-        let currentUserRoles = Xrm.Utility.getGlobalContext().userSettings.roles;
-        for (let id in currentUserRoles._collection) {
-            if (id === SYSTEM_ADMIN_ROLEID) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Делает поля Модели недоступными для изменения.
      * АХТУНГ: дополнительная проверка в бэкенде обязательна!
     */
@@ -47,7 +28,7 @@ AutoDealer.autodeal_vehicle_model = (function () {
                 case 2: //Update
                 case 3: //Read Only
                 case 6: //Bulk Edit (really 6)
-                    if (!checkAdminRole(ctx)) {
+                    if (!AutoDealer.roles.checkAdminRole(ctx)) {
                         readOnly(ctx);
                     }
 
