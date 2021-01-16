@@ -43,13 +43,12 @@ AutoDealer.autodeal_credit = (function () {
      * Валидирует данные на форме с помощью валидаторов из FORM_VALIDATORS
     */
     function validateForm(ctx) {
-        let event = context.getEventArgs();
+        let event = ctx.getEventArgs();
         let valid = true;
 
         FORM_VALIDATORS.forEach(
             validator => {
-                //lazy exec
-                valid &&= validator(ctx);
+                valid &= validator(ctx);
             }
         );
 

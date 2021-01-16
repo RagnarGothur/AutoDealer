@@ -1,13 +1,89 @@
 var AutoDealer = AutoDealer || {};
 
 AutoDealer.autodeal_agreement = (function () {
-    /**
-     * Скрывает вкладки
+    let globalNotificationIds = [];
+
+    /** 
+     * Невалидные сроки кредитной программы
     */
-    function hideTabs(ctx) {
+    const INVALID_CREDIT_PERIOD_MSG = "Дата договора вне периода действия кредитной программы";
+
+    /** 
+     * Список валидаторов формы
+    */
+    const FORM_VALIDATORS = [validateCredit];
+
+    /**
+     * Валидирует данные на форме с помощью валидаторов из FORM_VALIDATORS
+     * @param ctx = контекст,
+     * @param validationAccumulator = список ошибок валидации, optional
+    */
+    function validateForm(ctx, validationAccumulator = []) {
+        return new Promise((resolve, reject) => {
+            let validatorsChain = Promise.resolve(validationAccumulator);
+
+            FORM_VALIDATORS.forEach(
+                validator => {
+                    validatorsChain = validatorsChain.then(
+                        accum => validator(ctx, accum),
+                        err => console.error(validator.name + ": " + err)
+                    )
+                }
+            );
+
+            validatorsChain.then(resolve, reject);
+        });
+    };
+
+    /**
+     * Проверяет срок действия кредитной программы относительно даты договора.
+     * Если срок истек, система показывает пользователю сообщение.
+     * @param ctx = контекст,
+     * @param validationAccumulator = список ошибок валидации, optional
+    */
+    function validateCredit(ctx, validationAccumulator = []) {
+        return new Promise((resolve, reject) => {
+            let formContext = ctx.getFormContext();
+            let creditLookup = formContext.getAttribute("autodeal_creditid").getValue();
+            let agreementDate = formContext.getAttribute("autodeal_date").getValue();
+
+            if (!creditLookup || !agreementDate) {
+                resolve(validationAccumulator);
+                return;
+            }
+
+            Xrm.WebApi
+                .retrieveRecord("autodeal_credit", creditLookup[0].id)
+                .then(
+                    function (credit) {
+                        let dateStart = new Date(credit.autodeal_datestart);
+                        let dateEnd = new Date(credit.autodeal_dateend);
+
+                        if (!(dateStart <= agreementDate && agreementDate <= dateEnd)) {
+                            validationAccumulator.push(INVALID_CREDIT_PERIOD_MSG);
+                        }
+
+                        resolve(validationAccumulator);
+                    },
+
+                    function (err) {
+                        console.error(err.message);
+
+                        reject(err);
+                    },
+                );
+        })
+    }
+
+    /**
+     * Скрывает вкладку
+     * @param ctx = контекст,
+     * @param tabName = название таблицы,
+    */
+    function hideTab(ctx, tabName) {
         let formContext = ctx.getFormContext();
 
-        formContext.ui.tabs.get("credit_tab").setVisible(false);
+        formContext.ui.tabs.get(tabName).setVisible(false);
     };
 
     /**
@@ -36,12 +112,56 @@ AutoDealer.autodeal_agreement = (function () {
     /**
      * Обработчик события изменения кредитной программы.
      * По ТЗ:
-     * Если кредитная программа не выбрана - отключить прочие поля на вкладке кредита.
+     * 1) Если кредитная программа не выбрана - отключить прочие поля на вкладке кредита.
     */
-    function onCreditChange(ctx) {
-        let credit = ctx.getFormContext().getAttribute("autodeal_creditid").getValue();
+    function onCreditChangeEventHandler(ctx) {
+        let formContext = ctx.getFormContext();
+        let creditCtrl = formContext.getControl("autodeal_creditid");
+        let credit = formContext.getAttribute("autodeal_creditid").getValue();
+
+        creditCtrl.clearNotification();
+        formContext.getControl("autodeal_date").clearNotification();
+
+        validateCredit(ctx)
+            .then(
+                function (accumulator) {
+                    accumulator.forEach(msg => {
+                        creditCtrl.setNotification(msg);
+                    });
+                },
+
+                function (err) {
+                    console.error(err);
+                    creditCtrl.setNotification(err);
+                }
+            );
 
         changeTabFieldsState(ctx, "credit_tab", credit != null, ["autodeal_creditid"]);
+    }
+
+    /**
+     * Обработчик события изменения даты договора. Проверяет валидность даты под
+    */
+    function onDateChangeEventHandler(ctx) {
+        let formContext = ctx.getFormContext();
+        let dateCtrl = formContext.getControl("autodeal_date");
+
+        dateCtrl.clearNotification();
+        formContext.getControl("autodeal_creditid").clearNotification();
+
+        validateCredit(ctx)
+            .then(
+                function (accumulator) {
+                    accumulator.forEach(msg => {
+                        dateCtrl.setNotification(msg);
+                    });
+                },
+
+                function (err) {
+                    console.error(err);
+                    dateCtrl.setNotification(err);
+                }
+            );
     }
 
     /**
@@ -63,7 +183,7 @@ AutoDealer.autodeal_agreement = (function () {
     function filterCreditPrograms(ctx) {
         let formContext = ctx.getFormContext();
         let vehicle = formContext.getAttribute("autodeal_autoid").getValue();
-        let credit = formContext.getControl("autodeal_creditid");
+        let creditCtrl = formContext.getControl("autodeal_creditid");
 
         if (vehicle) {
             let fetchXml = [
@@ -91,8 +211,8 @@ AutoDealer.autodeal_agreement = (function () {
             ]
                 .join("");
 
-            credit.addCustomView(
-                credit.getDefaultView(),
+            creditCtrl.addCustomView(
+                creditCtrl.getDefaultView(),
                 "autodeal_credit",
                 "Доступные кредитные программы по автомобилю " + vehicle[0].name,
                 fetchXml,
@@ -123,21 +243,49 @@ AutoDealer.autodeal_agreement = (function () {
     }
 
     /**
+     * Обработчик события сохранения. Предотвращает сохранение в случае невалидности формы
+    */
+    function onSaveEventHandler(ctx) {
+        globalNotificationIds.forEach(id => Xrm.App.clearGlobalNotification(id));
+        globalNotificationIds = [];
+
+        validateForm(ctx, [])
+            .then(
+                validationAccumulator => {
+                    validationAccumulator.forEach(
+                        msg => {
+                            Xrm.App
+                                .addGlobalNotification({ level: 2, message: msg, type: 2 })
+                                .then(id => globalNotificationIds.push(id));
+                        }
+                    );
+                },
+                err => {
+                    console.error(err);
+                    context.getEventArgs().preventDefault();
+                }
+            );
+    }
+
+    /**
      * Добавляет обработчики событий
     */
     function addEventHandlers(ctx) {
         let formContext = ctx.getFormContext();
 
+        formContext.data.entity.addOnSave(onSaveEventHandler);
+
         formContext.getAttribute("autodeal_contact").addOnChange(showCreditTab);
         formContext.getAttribute("autodeal_autoid").addOnChange(showCreditTab);
         formContext.getAttribute("autodeal_autoid").addOnChange(filterCreditPrograms);
-        formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChange);
+        formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChangeEventHandler);
+        formContext.getAttribute("autodeal_date").addOnChange(onDateChangeEventHandler);
         formContext.getAttribute("autodeal_name").addOnChange(clearNumber);
     };
 
     return {
         onLoad: function (ctx) {
-            hideTabs(ctx);
+            hideTab(ctx, "credit_tab");
             changeTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
             addEventHandlers(ctx);
             filterCreditPrograms(ctx);
