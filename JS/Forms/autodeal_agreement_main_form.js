@@ -114,7 +114,7 @@ AutoDealer.autodeal_agreement = (function () {
      * По ТЗ:
      * 1) Если кредитная программа не выбрана - отключить прочие поля на вкладке кредита.
     */
-    function onCreditChangeEventHandler(ctx) {
+    function onCreditChanged(ctx) {
         let formContext = ctx.getFormContext();
         let credit = formContext.getAttribute("autodeal_creditid").getValue();
 
@@ -161,7 +161,7 @@ AutoDealer.autodeal_agreement = (function () {
         }
 
         Xrm.WebApi
-            .retrieveRecord("autodeal_credit", creditLookup[0].id)
+            .retrieveRecord("autodeal_credit", creditLookup[0].id, "?$select=autodeal_creditperiod")
             .then(
                 function (credit) {
                     let creditPeriod = credit.autodeal_creditperiod;
@@ -177,9 +177,49 @@ AutoDealer.autodeal_agreement = (function () {
     }
 
     /**
+     * Обновляет стоимость в договоре согласно данным по выбранному автомобилю
+     * По ТЗ:
+     * При выборе объекта Автомобиль в объекте Договор, стоимость должна подставляться 
+     * Автоматически в соответствии с правилом:
+     * Если автомобиль с пробегом, стоимость берется из поля Сумма на объекте Автомобиль.
+     * Если автомобиль без пробега, стоимость берется из поля Сумма объекта Модель, указанной на Автомобиле.
+    */
+    function updateCost(ctx) {
+        let formContext = ctx.getFormContext();
+        let vehicleLookup = formContext.getAttribute("autodeal_autoid").getValue();
+
+        if (!vehicleLookup) {
+            return;
+        }
+
+        Xrm.WebApi
+            .retrieveRecord(
+                "autodeal_vehicle",
+                vehicleLookup[0].id,
+                "?$select=autodeal_used,autodeal_amount,autodeal_modelId&$expand=autodeal_modelId($select=autodeal_recommendedamount)"
+            )
+            .then(
+                function (vehicle) {
+                    let used = vehicle.autodeal_used;
+                    let sumAttr = formContext.getAttribute("autodeal_sum");
+                    if (used) {
+                        sumAttr.setValue(vehicle.autodeal_amount);
+                    }
+                    else {
+                        sumAttr.setValue(vehicle.autodeal_modelId.autodeal_recommendedamount);
+                    }
+                },
+
+                function (err) {
+                    console.error(err.message);
+                },
+            );
+    }
+
+    /**
      * Обработчик события изменения даты договора
     */
-    function onDateChangeEventHandler(ctx) {
+    function onDateChanged(ctx) {
         let formContext = ctx.getFormContext();
         let dateCtrl = formContext.getControl("autodeal_date");
 
@@ -305,6 +345,19 @@ AutoDealer.autodeal_agreement = (function () {
             );
     }
 
+    function onVehicleChanged(ctx) {
+        let vehicle = ctx.getFormContext().getAttribute("autodeal_autoid").getValue();
+        if (vehicle) {
+            //Открываем вкладки
+            showCreditTab(ctx);
+
+            //Фильтруем кредитные программы
+            filterCreditPrograms(ctx);
+
+            updateCost(ctx);
+        }
+    }
+
     /**
      * Добавляет обработчики событий
     */
@@ -314,10 +367,9 @@ AutoDealer.autodeal_agreement = (function () {
         formContext.data.entity.addOnSave(onSaveEventHandler);
 
         formContext.getAttribute("autodeal_contact").addOnChange(showCreditTab);
-        formContext.getAttribute("autodeal_autoid").addOnChange(showCreditTab);
-        formContext.getAttribute("autodeal_autoid").addOnChange(filterCreditPrograms);
-        formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChangeEventHandler);
-        formContext.getAttribute("autodeal_date").addOnChange(onDateChangeEventHandler);
+        formContext.getAttribute("autodeal_autoid").addOnChange(onVehicleChanged);
+        formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChanged);
+        formContext.getAttribute("autodeal_date").addOnChange(onDateChanged);
         formContext.getAttribute("autodeal_name").addOnChange(clearNumber);
     };
 
