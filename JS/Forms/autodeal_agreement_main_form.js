@@ -243,7 +243,9 @@ AutoDealer.autodeal_agreement = (function () {
     }
 
     /**
-     * Делает видимой вкладку кредита
+     * Делает видимой вкладку кредита.
+     * По тз:
+     * При выборе контакта И авто должна стать видимой кредитная вкладка
     */
     function showCreditTab(ctx) {
         let formContext = ctx.getFormContext();
@@ -358,6 +360,10 @@ AutoDealer.autodeal_agreement = (function () {
         }
     }
 
+    function onContactChanged(ctx) {
+        showCreditTab(ctx);
+    }
+
     /**
      * Добавляет обработчики событий
     */
@@ -366,7 +372,7 @@ AutoDealer.autodeal_agreement = (function () {
 
         formContext.data.entity.addOnSave(onSaveEventHandler);
 
-        formContext.getAttribute("autodeal_contact").addOnChange(showCreditTab);
+        formContext.getAttribute("autodeal_contact").addOnChange(onContactChanged);
         formContext.getAttribute("autodeal_autoid").addOnChange(onVehicleChanged);
         formContext.getAttribute("autodeal_creditid").addOnChange(onCreditChanged);
         formContext.getAttribute("autodeal_date").addOnChange(onDateChanged);
@@ -383,12 +389,58 @@ AutoDealer.autodeal_agreement = (function () {
                 //walkthrough 
                 case 1: //Create
                     hideTab(ctx, "credit_tab");
+                    updateTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
                     break;
             }
-
-            updateTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
+            
             addEventHandlers(ctx);
             filterCreditPrograms(ctx);
+        },
+
+        /**
+         * Пересчитывает данные кредита по ТЗ:
+         * Пересчитывать поле сумма кредита:
+         * Сумма кредита = [Договор].[Сумма] – [Договор].[Первоначальный взнос]
+         * Пересчитать поле полная стоимость кредита:
+         * Полная стоимость кредита = ([Кредитная Программа].[Ставка] / 100 * [Договор].[Срок кредита] * [Договор].[Сумма кредита]) + [Договор].[Сумма кредита]
+        */
+        onCalculateCreditClick: function (primaryControl) {
+            let formContext = primaryControl;
+
+            let agreementSum = formContext.getControl("autodeal_sum").getValue();
+            let initialFee = formContext.getControl("autodeal_initialfee").getValue();
+            let creditLookup = formContext.getAttribute("autodeal_creditid").getValue();
+            let creditPeriod = formContext.getControl("autodeal_creditperiod").getValue();
+
+            if ([agreementSum, initialFee, creditLookup, creditPeriod].includes(null)) {
+                return;
+            }
+
+            let calculatedCreditSum = agreementSum - initialFee;
+
+            Xrm.WebApi
+                .retrieveRecord(
+                    "autodeal_credit",
+                    creditLookup[0].id,
+                    "?$select=autodeal_percent"
+                )
+                .then(
+                    function (credit) {
+                        let calculatedFullCredit = (
+                            (credit.autodeal_percent / 100) *
+                            creditPeriod *
+                            calculatedCreditSum
+                        ) +
+                            calculatedCreditSum;
+
+                        formContext.getAttribute("autodeal_fullcreditamount").setValue(calculatedFullCredit);
+                        formContext.getAttribute("autodeal_creditamount").setValue(calculatedCreditSum);
+                    },
+
+                    function (err) {
+                        console.error(err.message);
+                    },
+                );
         }
     };
 })();
