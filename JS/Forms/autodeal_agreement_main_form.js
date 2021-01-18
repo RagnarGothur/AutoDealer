@@ -392,7 +392,7 @@ AutoDealer.autodeal_agreement = (function () {
                     updateTabFieldsState(ctx, tabName = "credit_tab", enabled = false, except = ["autodeal_creditid"]);
                     break;
             }
-            
+
             addEventHandlers(ctx);
             filterCreditPrograms(ctx);
         },
@@ -413,8 +413,13 @@ AutoDealer.autodeal_agreement = (function () {
             let creditPeriod = formContext.getControl("autodeal_creditperiod").getValue();
 
             if ([agreementSum, initialFee, creditLookup, creditPeriod].includes(null)) {
+                console.log("Кредит не пересчитан, одно из обязательных полей не заполнено или заполнено неверно");
                 return;
             }
+
+            agreementSum = AutoDealer.convert.currencyToFloat(agreementSum);
+            initialFee = AutoDealer.convert.currencyToFloat(initialFee);
+            creditPeriod = creditPeriod.replaceAll(" ", "");
 
             let calculatedCreditSum = agreementSum - initialFee;
 
