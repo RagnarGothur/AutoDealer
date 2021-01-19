@@ -1,0 +1,48 @@
+body {
+    font-style: normal;
+    font-variant: normal;
+    text-overflow: ellipsis;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    border: none;
+}
+
+#cl-table {
+    margin: 0 0.75%;
+    width: 100%;
+}
+
+.cl-table-head {
+    background-color: rgb(233, 233, 233);
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-color: rgb(200, 200, 200);
+}
+
+.cl-row {
+    border-top: 0;
+    border-bottom: 1px solid;
+    border-color: rgb(205, 205, 205);
+    width: 100%;
+    padding: 0.35em;
+}
+
+.cl-col-head {
+    padding: 0.55em;
+    font-size: 17px;
+    color: rgb(0, 0, 0);
+    line-height: 24px;
+    font-family: SegoeUI-Semibold, "Segoe UI Semibold", "Segoe UI Regular", "Segoe UI";
+}
+
+.cl-col {
+    font-family: "Segoe UI Regular", SegoeUI, "Segoe UI";
+    font-size: 16px;
+}
+
+.cl-col :hover {
+    cursor: pointer;
+    background-color: rgb(243, 243, 243);
+}
