@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Autodealer.ConsoleApp
 {
+    /// <summary>
+    /// Точка входа консольного приложения
+    /// </summary>
     public class Program
     {
         private static string[] connStringKeys = new[]
@@ -24,6 +27,10 @@ namespace Autodealer.ConsoleApp
             "RedirectUri"
         };
 
+        /// <summary>
+        /// Точка входа консольного приложения
+        /// </summary>
+        /// <param name="args">Аргументы</param>
         public static void Main(string[] args)
         {
             try

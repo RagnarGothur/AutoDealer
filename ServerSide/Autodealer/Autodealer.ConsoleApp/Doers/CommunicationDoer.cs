@@ -11,11 +11,29 @@ using System.Threading.Tasks;
 
 namespace Autodealer.ConsoleApp.Doers
 {
+    /// <summary>
+    /// Выполняет следующую задачу:
+    /// Выбирает все объекты средства связи, где поле [основной]=Да, и устанавливает значения на связанном объекте Контакт значения
+    /// Telephone1 – значение из найденного объекта Средство Связи, где основной=Да и Тип=Телефон
+    /// emailaddress1 – значение из найденного объекта Средство Связи, где основной=Да и Тип= E-mail
+    /// Приложение не должно обновлять запись Контакт, если необходимые данные уже записаны в его поля.
+    /// </summary>
     public class CommunicationDoer : BaseDoer
     {
+        /// <summary>
+        /// .ctor
+        /// </summary>
+        /// <param name="crm">Crm api клиент</param>
         public CommunicationDoer(IOrganizationService crm) : base(crm)
         { }
 
+        /// <summary>
+        /// Выбирает все объекты средства связи, где поле [основной]=Да, и устанавливает значения на связанном объекте Контакт значения
+        /// Telephone1 – значение из найденного объекта Средство Связи, где основной=Да и Тип=Телефон
+        /// emailaddress1 – значение из найденного объекта Средство Связи, где основной=Да и Тип= E-mail
+        /// Приложение не должно обновлять запись Контакт, если необходимые данные уже записаны в его поля.
+        /// </summary>
+        /// <returns></returns>
         public override async Task DoAsync()
         {
             Log.Logger.Debug($"{nameof(CommunicationDoer)}: Constructing the query");

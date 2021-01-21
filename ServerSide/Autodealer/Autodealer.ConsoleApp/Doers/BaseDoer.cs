@@ -9,21 +9,44 @@ using System.Threading.Tasks;
 
 namespace Autodealer.ConsoleApp.Doers
 {
+    /// <summary>
+    /// Базовый класс исполнителя
+    /// </summary>
     public abstract class BaseDoer : IDoer
     {
+        /// <summary>
+        /// Максимальное количество одновременных отправок сущностей
+        /// </summary>
         public const byte MAX_SIMULTANEOUS_SENDINGS = 10;
 
         private SemaphoreSlim _semaphore = new SemaphoreSlim(MAX_SIMULTANEOUS_SENDINGS);
 
+        /// <summary>
+        /// Crm api клиент
+        /// </summary>
         protected IOrganizationService Crm { get; }
 
+        /// <summary>
+        /// .ctor
+        /// </summary>
+        /// <param name="crm">Crm api клиент</param>
         public BaseDoer(IOrganizationService crm)
         {
             Crm = crm ?? throw new ArgumentNullException(nameof(crm));
         }
 
+        /// <summary>
+        /// Асинхронное выполнение задачи
+        /// </summary>
+        /// <returns></returns>
         public abstract Task DoAsync();
 
+        /// <summary>
+        /// Отправляет сущности на сервер
+        /// </summary>
+        /// <param name="mode">Режим отправки сущностей</param>
+        /// <param name="entities">Сущности для отправки</param>
+        /// <returns></returns>
         protected async Task SendEntitiesAsync(SendEntityMode mode, params Entity[] entities)
         {
             Log.Logger.Debug($"Sending {entities.Length} entities: {nameof(mode)}: {mode} in {MAX_SIMULTANEOUS_SENDINGS} tasks");
