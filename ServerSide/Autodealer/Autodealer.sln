@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autodealer.ConsoleApp", "Autodealer.ConsoleApp\Autodealer.ConsoleApp.csproj", "{46B9368D-0240-4A14-8BB8-17946BD5544A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DC0C9C2C-9040-46EB-A62F-56BF1328E6B4} = {DC0C9C2C-9040-46EB-A62F-56BF1328E6B4}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autodealer.Shared", "Autodealer.Shared\Autodealer.Shared.csproj", "{DC0C9C2C-9040-46EB-A62F-56BF1328E6B4}"
 EndProject
