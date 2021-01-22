@@ -18,7 +18,7 @@ namespace Autodealer.ConsoleApp
     /// </summary>
     public class Program
     {
-        private static string[] connStringKeys = new[]
+        private static readonly string[] connStringKeys = new[]
         {
             "AuthType",
             "RequireNewInstance",

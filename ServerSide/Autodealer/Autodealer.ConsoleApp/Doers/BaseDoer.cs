@@ -19,7 +19,7 @@ namespace Autodealer.ConsoleApp.Doers
         /// </summary>
         public const byte MAX_SIMULTANEOUS_SENDINGS = 10;
 
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(MAX_SIMULTANEOUS_SENDINGS);
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(MAX_SIMULTANEOUS_SENDINGS);
 
         /// <summary>
         /// Crm api клиент

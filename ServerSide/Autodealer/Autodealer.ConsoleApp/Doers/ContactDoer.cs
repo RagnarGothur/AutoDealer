@@ -140,29 +140,27 @@ namespace Autodealer.ConsoleApp.Doers
 
         private QueryExpression GetQuery()
         {
-            var query = new QueryExpression(Contact.EntityLogicalName);
+            // Instantiate QueryExpression query
+            var query = new QueryExpression("contact");
 
-            query.ColumnSet.AddColumns(Contact.PrimaryIdAttribute, Contact.Fields.Telephone1, Contact.Fields.EMailAddress1);
+            // Add columns to query.ColumnSet
+            query.ColumnSet.AddColumns("telephone1", "emailaddress1");
 
+            // Define filter query.Criteria
             var query_Criteria_0 = new FilterExpression();
-            query_Criteria_0.FilterOperator = LogicalOperator.Or;
-            query_Criteria_0.AddCondition(Contact.Fields.EMailAddress1, ConditionOperator.NotNull);
-            query_Criteria_0.AddCondition(Contact.Fields.Telephone1, ConditionOperator.NotNull);
-
             query.Criteria.AddFilter(query_Criteria_0);
 
-            var query_autodeal_communication = query.AddLink(
-                autodeal_communication.EntityLogicalName,
-                Contact.PrimaryIdAttribute,
-                autodeal_communication.Fields.autodeal_contactid,
-                JoinOperator.LeftOuter
-            );
+            // Define filter query_Criteria_0
+            query_Criteria_0.FilterOperator = LogicalOperator.Or;
+            query_Criteria_0.AddCondition("telephone1", ConditionOperator.NotNull);
+            query_Criteria_0.AddCondition("emailaddress1", ConditionOperator.NotNull);
 
-            query_autodeal_communication.Columns.AddColumns(
-                autodeal_communication.Fields.autodeal_communicationId,
-                autodeal_communication.Fields.autodeal_email,
-                autodeal_communication.Fields.autodeal_phone
-            );
+            // Add link-entity query_autodeal_communication
+            var query_autodeal_communication = query.AddLink("autodeal_communication", "contactid", "autodeal_contactid", JoinOperator.LeftOuter);
+
+            // Add columns to query_autodeal_communication.Columns
+            query_autodeal_communication.Columns.AddColumns("autodeal_communicationid", "autodeal_email", "autodeal_phone");
+
 
             return query;
         }
