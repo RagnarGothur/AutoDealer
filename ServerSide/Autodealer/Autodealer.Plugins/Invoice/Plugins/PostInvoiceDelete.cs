@@ -7,7 +7,7 @@ using System;
 
 namespace Autodealer.Plugins.Invoice.Plugins
 {
-    public class PreInvoiceCreate : BasePlugin, IPlugin
+    public class PostInvoiceDelete : BasePlugin, IPlugin
     {
         public override void Execute(IServiceProvider serviceProvider)
         {
@@ -16,12 +16,12 @@ namespace Autodealer.Plugins.Invoice.Plugins
             try
             {
                 tracer.Trace($"Get {nameof(Entity)}");
-                var target = ((Entity)ctx.InputParameters["Target"]).ToEntity<autodeal_invoice>();
+                var target = ((EntityReference)ctx.InputParameters["Target"]);
 
                 tracer.Trace($"Create {nameof(InvoiceHandler)}");
                 var service = new InvoiceHandler(crm, tracer);
 
-                service.HandlePreCreate(target);
+                service.HandlePostDelete(target);
             }
             catch (Exception e)
             {

@@ -1,13 +1,13 @@
-﻿using Autodealer.Plugins.Invoice.Handlers;
+﻿using Autodealer.Plugins.Agreement.Handlers;
 using Autodealer.Shared.Entities;
 
 using Microsoft.Xrm.Sdk;
 
 using System;
 
-namespace Autodealer.Plugins.Invoice.Plugins
+namespace Autodealer.Plugins.Agreement.Plugins
 {
-    public class PreInvoiceCreate : BasePlugin, IPlugin
+    public class PostAgreementCreate : BasePlugin, IPlugin
     {
         public override void Execute(IServiceProvider serviceProvider)
         {
@@ -16,12 +16,11 @@ namespace Autodealer.Plugins.Invoice.Plugins
             try
             {
                 tracer.Trace($"Get {nameof(Entity)}");
-                var target = ((Entity)ctx.InputParameters["Target"]).ToEntity<autodeal_invoice>();
+                var target = ((Entity)ctx.InputParameters["Target"]).ToEntity<autodeal_agreement>();
 
-                tracer.Trace($"Create {nameof(InvoiceHandler)}");
-                var service = new InvoiceHandler(crm, tracer);
-
-                service.HandlePreCreate(target);
+                tracer.Trace($"Create {nameof(AgreementHandler)}");
+                var service = new AgreementHandler(crm, tracer);
+                service.EnsureDataConsistency(target);
             }
             catch (Exception e)
             {

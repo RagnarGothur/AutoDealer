@@ -7,7 +7,7 @@ using System;
 
 namespace Autodealer.Plugins.Invoice.Plugins
 {
-    public class PreInvoiceCreate : BasePlugin, IPlugin
+    public class PostInvoiceCreate : BasePlugin, IPlugin
     {
         public override void Execute(IServiceProvider serviceProvider)
         {
@@ -21,7 +21,7 @@ namespace Autodealer.Plugins.Invoice.Plugins
                 tracer.Trace($"Create {nameof(InvoiceHandler)}");
                 var service = new InvoiceHandler(crm, tracer);
 
-                service.HandlePreCreate(target);
+                service.HandlePostCreate(target);
             }
             catch (Exception e)
             {

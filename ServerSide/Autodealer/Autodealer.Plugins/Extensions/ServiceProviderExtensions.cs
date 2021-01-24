@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Autodealer.Plugins
+namespace Autodealer.Plugins.Extensions
 {
     public static class ServiceProviderExtensions
     {

@@ -87,12 +87,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Agreement\Handlers\AgreementHandler.cs" />
+    <Compile Include="Agreement\Plugins\PostAgreementCreate.cs" />
     <Compile Include="BasePlugin.cs" />
-    <Compile Include="BaseService.cs" />
-    <Compile Include="Invoice\Handlers\InvoiceService.cs" />
+    <Compile Include="BaseHandler.cs" />
+    <Compile Include="Invoice\Handlers\InvoiceHandler.cs" />
+    <Compile Include="Invoice\Plugins\PostInvoiceDelete.cs" />
+    <Compile Include="Invoice\Plugins\PostInvoiceUpdate.cs" />
+    <Compile Include="Invoice\Plugins\PostInvoiceCreate.cs" />
     <Compile Include="Invoice\Plugins\PreInvoiceCreate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceProviderExtensions.cs" />
+    <Compile Include="Extensions\ServiceProviderExtensions.cs" />
+    <Compile Include="Extensions\TracingServiceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Autodealer.Plugins.snk" />

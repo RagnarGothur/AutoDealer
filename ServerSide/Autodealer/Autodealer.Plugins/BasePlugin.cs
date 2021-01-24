@@ -1,4 +1,6 @@
-﻿using Microsoft.Xrm.Sdk;
+﻿using Autodealer.Plugins.Extensions;
+
+using Microsoft.Xrm.Sdk;
 
 using System;
 

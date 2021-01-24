@@ -4,15 +4,16 @@ using System;
 
 namespace Autodealer.Plugins
 {
-    public abstract class BaseService
+    public abstract class BaseHandler
     {
         protected IOrganizationService Crm { get; }
         protected ITracingService Tracer { get; }
 
-        public BaseService(IOrganizationService crm, ITracingService tracer)
+        public BaseHandler(IOrganizationService crm, ITracingService tracer)
         {
             Crm = crm ?? throw new ArgumentNullException(nameof(crm));
             Tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
+            Tracer.Trace($"{this} created");
         }
     }
 }
