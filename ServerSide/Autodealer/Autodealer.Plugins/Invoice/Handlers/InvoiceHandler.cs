@@ -21,12 +21,18 @@ namespace Autodealer.Plugins.Invoice.Handlers
 
         public void HandlePostCreate(autodeal_invoice invoice)
         {
-            EnsurePaidConsistency(invoice ?? throw new ArgumentNullException(nameof(invoice)));
+            if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
+            {
+                EnsurePaidConsistency(invoice);
+            }
         }
 
         public void HandlePostUpdate(autodeal_invoice invoice)
         {
-            EnsurePaidConsistency(invoice ?? throw new ArgumentNullException(nameof(invoice)));
+            if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
+            {
+                EnsurePaidConsistency(invoice);
+            }
         }
 
         public void HandlePostDelete(EntityReference invoiceRef)
@@ -34,13 +40,16 @@ namespace Autodealer.Plugins.Invoice.Handlers
             if (invoiceRef is null) throw new ArgumentNullException(nameof(invoiceRef));
 
             var columns = new ColumnSet(autodeal_invoice.Fields.autodeal_amount, autodeal_invoice.Fields.autodeal_fact);
-            var toDelete = Crm.Retrieve(
+            var invoice = Crm.Retrieve(
                 autodeal_invoice.EntityLogicalName,
                 invoiceRef.Id,
                 columns
             ).ToEntity<autodeal_invoice>();
 
-            EnsurePaidConsistency(toDelete);
+            if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
+            {
+                EnsurePaidConsistency(invoice);
+            }
         }
 
         private void EnsurePaidConsistency(autodeal_invoice freshInvoice)
@@ -61,7 +70,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
                 autodeal_agreement.PrimaryIdAttribute
             );
 
-            agreementLink.Columns.AddColumns(autodeal_agreement.PrimaryIdAttribute);
+            agreementLink.Columns.AddColumns(autodeal_agreement.PrimaryIdAttribute, autodeal_agreement.Fields.autodeal_sum);
             agreementLink.LinkCriteria.AddCondition(
                 autodeal_agreement.PrimaryIdAttribute, 
                 ConditionOperator.Equal, 
@@ -92,15 +101,32 @@ namespace Autodealer.Plugins.Invoice.Handlers
             {
                 Tracer.TraceCaller($"Adding the current invoice sum {freshInvoice.autodeal_amount.Value} to calculated sum {sum}");
                 sum += freshInvoice.autodeal_amount.Value;
+
+                freshInvoice.autodeal_paydate = DateTime.UtcNow.Date;
+                Crm.Update(freshInvoice);
             }
 
             var agreement = new autodeal_agreement(freshInvoice.autodeal_dogovorid.Id)
             {
-                autodeal_sum = new Money(sum)
+                autodeal_factsum = new Money(sum)
             };
 
-            Tracer.TraceCaller($"Updating agreement with calculated sum {sum}");
+            CheckFactSumConsistency(agreement);
+
+            Tracer.TraceCaller($"Updating agreement {autodeal_agreement.Fields.autodeal_factsum} with calculated sum {sum}");
             Crm.Update(agreement);
+        }
+
+        private void CheckFactSumConsistency(autodeal_agreement agreement, decimal? factSum = null)
+        {
+            Tracer.TraceCaller("checking agreement fact sum consistency");
+            factSum = factSum ?? agreement.autodeal_factsum.Value;
+
+            if (agreement.autodeal_sum.Value > factSum)
+            {
+                Tracer.TraceCaller($"fact sum inconsistency found! fact sum: {factSum}; agreement sum: {agreement.autodeal_sum}");
+                throw new InvalidPluginExecutionException("Сумма оплаченных счетов договора не должна превышать общую сумму договора");
+            }
         }
 
         private void SetInvoiceType(autodeal_invoice invoice)
