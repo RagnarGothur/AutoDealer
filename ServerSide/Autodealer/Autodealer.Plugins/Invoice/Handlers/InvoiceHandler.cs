@@ -23,7 +23,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
         {
             if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
             {
-                EnsurePaidConsistency(invoice);
+                EnsureFactConsistency(invoice);
             }
         }
 
@@ -31,7 +31,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
         {
             if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
             {
-                EnsurePaidConsistency(invoice);
+                EnsureFactConsistency(invoice);
             }
         }
 
@@ -48,11 +48,11 @@ namespace Autodealer.Plugins.Invoice.Handlers
 
             if (invoice?.autodeal_fact != null || invoice?.autodeal_amount != null)
             {
-                EnsurePaidConsistency(invoice);
+                EnsureFactConsistency(invoice);
             }
         }
 
-        private void EnsurePaidConsistency(autodeal_invoice freshInvoice)
+        private void EnsureFactConsistency(autodeal_invoice freshInvoice)
         {
             Tracer.TraceCaller("Getting invoices related to agreement of the fresh invoice");
 
@@ -112,6 +112,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
             };
 
             CheckFactSumConsistency(agreement);
+            UpdateFact(agreement);
 
             Tracer.TraceCaller($"Updating agreement {autodeal_agreement.Fields.autodeal_factsum} with calculated sum {sum}");
             Crm.Update(agreement);
@@ -126,6 +127,15 @@ namespace Autodealer.Plugins.Invoice.Handlers
             {
                 Tracer.TraceCaller($"fact sum inconsistency found! fact sum: {factSum}; agreement sum: {agreement.autodeal_sum}");
                 throw new InvalidPluginExecutionException("Сумма оплаченных счетов договора не должна превышать общую сумму договора");
+            }
+        }
+
+        private void UpdateFact(autodeal_agreement agreement)
+        {
+            Tracer.TraceCaller("updating agreement fact");
+            if (agreement.autodeal_factsum?.Value == agreement.autodeal_sum?.Value)
+            {
+                agreement.autodeal_fact = true;
             }
         }
 
