@@ -1,4 +1,5 @@
-﻿using Autodealer.Shared.Entities;
+﻿using Autodealer.Shared;
+using Autodealer.Shared.Entities;
 using Autodealer.Shared.Extensions;
 
 using Microsoft.Xrm.Sdk;
@@ -12,7 +13,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
     /// <summary>
     /// Сервис обслуживающий плагины сущности autodeal_invoice
     /// </summary>
-    public class InvoiceService : BaseService
+    public class InvoiceService : EntityService
     {
         /// <summary>
         /// .ctor

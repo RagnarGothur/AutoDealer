@@ -1,4 +1,5 @@
-﻿using Autodealer.Shared.Entities;
+﻿using Autodealer.Shared;
+using Autodealer.Shared.Entities;
 using Autodealer.Shared.Extensions;
 
 using Microsoft.Xrm.Sdk;
@@ -11,7 +12,7 @@ namespace Autodealer.Plugins.Agreement.Handlers
     /// <summary>
     /// Сервис обслуживающий плагины сущности autodeal_agreement
     /// </summary>
-    public class AgreementService : BaseService
+    public class AgreementService : EntityService
     {
         /// <summary>
         /// .ctor

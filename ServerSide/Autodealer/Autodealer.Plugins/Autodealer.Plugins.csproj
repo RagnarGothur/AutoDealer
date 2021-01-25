@@ -92,7 +92,6 @@
     <Compile Include="Agreement\Handlers\AgreementService.cs" />
     <Compile Include="Agreement\Plugins\PostAgreementCreate.cs" />
     <Compile Include="BasePlugin.cs" />
-    <Compile Include="BaseService.cs" />
     <Compile Include="Communication\Handlers\CommunicationService.cs" />
     <Compile Include="Communication\Plugins\PreCommunicationUpdate.cs" />
     <Compile Include="Communication\Plugins\PreCommunicationCreate.cs" />

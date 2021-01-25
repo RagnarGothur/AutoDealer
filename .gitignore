@@ -378,5 +378,8 @@ Controllers/WeatherForecastController.cs
 bin/
 obj/
 
+#snk files
+*.snk
+
 #secrets
 secrets.json

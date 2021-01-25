@@ -1,4 +1,5 @@
-﻿using Autodealer.Shared.Entities;
+﻿using Autodealer.Shared;
+using Autodealer.Shared.Entities;
 using Autodealer.Shared.Extensions;
 
 using Microsoft.Xrm.Sdk;
@@ -12,7 +13,7 @@ namespace Autodealer.Plugins.Communication.Handlers
     /// <summary>
     /// Сервис обслуживающий плагины сущности autodeal_communication
     /// </summary>
-    public class CommunicationService : BaseService
+    public class CommunicationService : EntityService
     {
         /// <summary>
         /// .ctor

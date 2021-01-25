@@ -1,13 +1,15 @@
 ﻿using Microsoft.Xrm.Sdk;
 
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Autodealer.Plugins
+namespace Autodealer.Shared
 {
     /// <summary>
     /// Базовый сервис
     /// </summary>
-    public abstract class BaseService
+    public abstract class EntityService
     {
         /// <summary>
         /// Клиент Crm api
@@ -24,11 +26,25 @@ namespace Autodealer.Plugins
         /// </summary>
         /// <param name="crm">Клиент Crm api</param>
         /// <param name="tracer">Сервис трейсинга</param>
-        public BaseService(IOrganizationService crm, ITracingService tracer)
+        public EntityService(IOrganizationService crm, ITracingService tracer)
         {
             Crm = crm ?? throw new ArgumentNullException(nameof(crm));
             Tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
-            Tracer.Trace($"{this} created");
+            Tracer.Trace($"{this.GetType().Name} created");
+        }
+
+        public async Task DeleteEntitiesAsync(params Entity[] entities)
+        {
+            var tasks = new List<Task>();
+            foreach (Entity entity in entities)
+            {
+                var e = entity; // для правильного замыкания
+                tasks.Add(Task.Run(() => 
+                    Crm.Delete(e.LogicalName, e.Id))
+                );
+            }
+
+            await Task.WhenAll(tasks);
         }
     }
 }
