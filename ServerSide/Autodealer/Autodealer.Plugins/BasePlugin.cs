@@ -6,10 +6,22 @@ using System;
 
 namespace Autodealer.Plugins
 {
+    /// <summary>
+    /// Абстрактный класс плагина
+    /// </summary>
     public abstract class BasePlugin : IPlugin
     {
+        /// <summary>
+        /// Выполняет код плагина
+        /// </summary>
+        /// <param name="serviceProvider"></param>
         public abstract void Execute(IServiceProvider serviceProvider);
 
+        /// <summary>
+        /// Возвращает основные используемые сервисы из проводника сервисов
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <returns>Кортеж ITracingService, IPluginExecutionContext, IOrganizationService</returns>
         protected static (ITracingService, IPluginExecutionContext, IOrganizationService) GetMainServices(IServiceProvider serviceProvider)
         {
             var tracingService = serviceProvider.GetService<ITracingService>();

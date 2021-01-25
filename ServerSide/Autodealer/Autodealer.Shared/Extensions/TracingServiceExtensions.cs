@@ -2,7 +2,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace Autodealer.Plugins.Extensions
+namespace Autodealer.Shared.Extensions
 {
     public static class TracingServiceExtensions
     {

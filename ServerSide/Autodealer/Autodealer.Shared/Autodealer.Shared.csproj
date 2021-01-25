@@ -122,6 +122,8 @@
     <Compile Include="Entities\OptionSets.cs" />
     <Compile Include="Entities\ServiceContext.cs" />
     <Compile Include="Entities\SystemUser.cs" />
+    <Compile Include="Extensions\ServiceProviderExtensions.cs" />
+    <Compile Include="Extensions\TracingServiceExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

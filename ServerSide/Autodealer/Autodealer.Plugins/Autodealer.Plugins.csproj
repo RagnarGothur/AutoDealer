@@ -41,6 +41,8 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <DocumentationFile>bin\x64\Debug\Autodealer.Plugins.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -87,21 +89,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Agreement\Handlers\AgreementHandler.cs" />
+    <Compile Include="Agreement\Handlers\AgreementService.cs" />
     <Compile Include="Agreement\Plugins\PostAgreementCreate.cs" />
     <Compile Include="BasePlugin.cs" />
-    <Compile Include="BaseHandler.cs" />
-    <Compile Include="Communication\Handlers\CommunicationHandler.cs" />
+    <Compile Include="BaseService.cs" />
+    <Compile Include="Communication\Handlers\CommunicationService.cs" />
     <Compile Include="Communication\Plugins\PreCommunicationUpdate.cs" />
     <Compile Include="Communication\Plugins\PreCommunicationCreate.cs" />
-    <Compile Include="Invoice\Handlers\InvoiceHandler.cs" />
+    <Compile Include="Invoice\Handlers\InvoiceService.cs" />
     <Compile Include="Invoice\Plugins\PostInvoiceDelete.cs" />
     <Compile Include="Invoice\Plugins\PostInvoiceUpdate.cs" />
     <Compile Include="Invoice\Plugins\PostInvoiceCreate.cs" />
     <Compile Include="Invoice\Plugins\PreInvoiceCreate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\ServiceProviderExtensions.cs" />
-    <Compile Include="Extensions\TracingServiceExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Autodealer.Plugins.snk" />

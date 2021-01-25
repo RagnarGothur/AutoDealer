@@ -18,8 +18,8 @@ namespace Autodealer.Plugins.Agreement.Plugins
                 tracer.Trace($"Get {nameof(Entity)}");
                 var target = ((Entity)ctx.InputParameters["Target"]).ToEntity<autodeal_agreement>();
 
-                tracer.Trace($"Create {nameof(AgreementHandler)}");
-                var service = new AgreementHandler(crm, tracer);
+                tracer.Trace($"Create {nameof(AgreementService)}");
+                var service = new AgreementService(crm, tracer);
                 service.EnsureDataConsistency(target);
             }
             catch (Exception e)

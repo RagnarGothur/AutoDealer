@@ -1,27 +1,42 @@
-﻿using Autodealer.Plugins.Extensions;
-using Autodealer.Shared.Entities;
+﻿using Autodealer.Shared.Entities;
+using Autodealer.Shared.Extensions;
 
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-using System;
 using System.Linq;
 
 namespace Autodealer.Plugins.Agreement.Handlers
 {
-    public class AgreementHandler : BaseHandler
+    /// <summary>
+    /// Сервис обслуживающий плагины сущности autodeal_agreement
+    /// </summary>
+    public class AgreementService : BaseService
     {
-        public AgreementHandler(IOrganizationService crm, ITracingService tracer) : base(crm, tracer)
+        /// <summary>
+        /// .ctor
+        /// </summary>
+        /// <param name="crm">Клиент Crm api</param>
+        /// <param name="tracer">Сервис трейсинга</param>
+        public AgreementService(IOrganizationService crm, ITracingService tracer) : base(crm, tracer)
         { }
 
+        /// <summary>
+        /// Обеспечивает консистентность данных после создания/изменения сущности
+        /// </summary>
+        /// <param name="agreement">Договор</param>
         public void EnsureDataConsistency(autodeal_agreement agreement)
         {
             EnsureContactDateConsistency(agreement);
         }
 
+        /// <summary>
+        /// Автоматически заполняет поле [Дата первого договора] на объекте Контакт. 
+        /// Поле заполняется датой договора из объекта Договор, при условии, что создаваемый договор – первый.
+        /// </summary>
+        /// <param name="agreement">Договор</param>
         private void EnsureContactDateConsistency(autodeal_agreement agreement)
         {
-            Tracer.TraceCaller($"{nameof(EnsureContactDateConsistency)}: create query");
             var query = new QueryExpression(autodeal_agreement.EntityLogicalName);
             query.ColumnSet.AddColumns(autodeal_agreement.PrimaryIdAttribute, autodeal_agreement.Fields.autodeal_contact);
             query.Criteria.AddCondition(autodeal_agreement.PrimaryIdAttribute, ConditionOperator.NotEqual, agreement.Id);

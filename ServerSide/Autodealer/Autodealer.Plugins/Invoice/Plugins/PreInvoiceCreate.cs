@@ -18,8 +18,8 @@ namespace Autodealer.Plugins.Invoice.Plugins
                 tracer.Trace($"Get {nameof(Entity)}");
                 var target = ((Entity)ctx.InputParameters["Target"]).ToEntity<autodeal_invoice>();
 
-                tracer.Trace($"Create {nameof(InvoiceHandler)}");
-                var service = new InvoiceHandler(crm, tracer);
+                tracer.Trace($"Create {nameof(InvoiceService)}");
+                var service = new InvoiceService(crm, tracer);
 
                 service.HandlePreCreate(target);
             }

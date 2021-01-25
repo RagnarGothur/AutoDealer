@@ -1,5 +1,5 @@
-﻿using Autodealer.Plugins.Extensions;
-using Autodealer.Shared.Entities;
+﻿using Autodealer.Shared.Entities;
+using Autodealer.Shared.Extensions;
 
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
@@ -9,9 +9,17 @@ using System.Linq;
 
 namespace Autodealer.Plugins.Invoice.Handlers
 {
-    public class InvoiceHandler : BaseHandler
+    /// <summary>
+    /// Сервис обслуживающий плагины сущности autodeal_invoice
+    /// </summary>
+    public class InvoiceService : BaseService
     {
-        public InvoiceHandler(IOrganizationService crm, ITracingService tracer) : base(crm, tracer)
+        /// <summary>
+        /// .ctor
+        /// </summary>
+        /// <param name="crm">Клиент Crm api</param>
+        /// <param name="tracer">Сервис трейсинга</param>
+        public InvoiceService(IOrganizationService crm, ITracingService tracer) : base(crm, tracer)
         { }
 
         public void HandlePreCreate(autodeal_invoice invoice)
@@ -52,6 +60,10 @@ namespace Autodealer.Plugins.Invoice.Handlers
             }
         }
 
+        /// <summary>
+        /// Автоматически пересчитывает поле [Оплаченная Сумма] в объекте Договор при если статус счета оплачено
+        /// </summary>
+        /// <param name="freshInvoice"></param>
         private void EnsureFactConsistency(autodeal_invoice freshInvoice)
         {
             Tracer.TraceCaller("Getting invoices related to agreement of the fresh invoice");
@@ -112,7 +124,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
             };
 
             CheckFactSumConsistency(agreement);
-            UpdateFact(agreement);
+            UpdateAgreementFact(agreement);
 
             Tracer.TraceCaller($"Updating agreement {autodeal_agreement.Fields.autodeal_factsum} with calculated sum {sum}");
             Crm.Update(agreement);
@@ -130,7 +142,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
             }
         }
 
-        private void UpdateFact(autodeal_agreement agreement)
+        private void UpdateAgreementFact(autodeal_agreement agreement)
         {
             Tracer.TraceCaller("updating agreement fact");
             if (agreement.autodeal_factsum?.Value == agreement.autodeal_sum?.Value)
