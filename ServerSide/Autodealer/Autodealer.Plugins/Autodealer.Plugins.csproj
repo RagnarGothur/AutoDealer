@@ -91,6 +91,9 @@
     <Compile Include="Agreement\Plugins\PostAgreementCreate.cs" />
     <Compile Include="BasePlugin.cs" />
     <Compile Include="BaseHandler.cs" />
+    <Compile Include="Communication\Handlers\CommunicationHandler.cs" />
+    <Compile Include="Communication\Plugins\PreCommunicationUpdate.cs" />
+    <Compile Include="Communication\Plugins\PreCommunicationCreate.cs" />
     <Compile Include="Invoice\Handlers\InvoiceHandler.cs" />
     <Compile Include="Invoice\Plugins\PostInvoiceDelete.cs" />
     <Compile Include="Invoice\Plugins\PostInvoiceUpdate.cs" />
@@ -111,6 +114,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

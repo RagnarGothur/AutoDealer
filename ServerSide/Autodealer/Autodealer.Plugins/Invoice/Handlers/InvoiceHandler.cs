@@ -85,7 +85,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
             );
 
             decimal sum = otherInvoices
-                .Where(i => i.autodeal_amount != null && i.autodeal_fact != null && (bool)i.autodeal_fact && i.Id != freshInvoice.Id)
+                .Where(i => i.autodeal_amount != null && i.autodeal_fact.GetValueOrDefault(false) && i.Id != freshInvoice.Id)
                 .Aggregate(new decimal(0), (accum, i) => accum += i.autodeal_amount.Value);
 
             Tracer.TraceCaller($"Getting the current invoice {freshInvoice.Id} from the retrieved invoices");
@@ -97,7 +97,7 @@ namespace Autodealer.Plugins.Invoice.Handlers
                 freshInvoice.autodeal_fact = freshInvoice.autodeal_fact ?? savedInvoice.autodeal_fact;
             }
 
-            if (freshInvoice.autodeal_fact != null && (bool)freshInvoice.autodeal_fact)
+            if (freshInvoice.autodeal_fact.GetValueOrDefault(false))
             {
                 Tracer.TraceCaller($"Adding the current invoice sum {freshInvoice.autodeal_amount.Value} to calculated sum {sum}");
                 sum += freshInvoice.autodeal_amount.Value;
